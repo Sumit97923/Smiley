@@ -95,7 +95,34 @@
         let selectedReplyMsgId = null;
         let selectedEditMsgId = null;
 
-        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        // 🌟 Metered.ca Free TURN/STUN Servers Configuration
+        const configuration = {
+          iceServers: [
+              {
+                urls: "stun:stun.relay.metered.ca:80",
+              },
+              {
+                urls: "turn:global.relay.metered.ca:80",
+                username: "c82e54e33431753c971307b9",
+                credential: "WNGRoCt9akSdjdCk",
+              },
+              {
+                urls: "turn:global.relay.metered.ca:80?transport=tcp",
+                username: "c82e54e33431753c971307b9",
+                credential: "WNGRoCt9akSdjdCk",
+              },
+              {
+                urls: "turn:global.relay.metered.ca:443",
+                username: "c82e54e33431753c971307b9",
+                credential: "WNGRoCt9akSdjdCk",
+              },
+              {
+                urls: "turns:global.relay.metered.ca:443?transport=tcp",
+                username: "c82e54e33431753c971307b9",
+                credential: "WNGRoCt9akSdjdCk",
+              },
+          ],
+        };
         const actionBtn = document.getElementById("action-btn");
         const statusBanner = document.getElementById("status-banner");
         const messagesContainer = document.getElementById("messages-container");
