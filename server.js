@@ -26,7 +26,9 @@ function maskBadWords(text) {
     });
     return cleanText;
 }
-
+app.get('/googledf5bde9b8612d08a.html', (req, res) => {
+    res.send('google-site-verification: googledf5bde9b8612d08a.html');
+});
 // Global active channels routing pools
 let waitingUsers = { all: [], male: [], female: [] };
 
