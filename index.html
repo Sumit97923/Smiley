@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Favicon (Logo) Link -->
-<link rel="icon" type="image/png" href="/favicon.png">
-
-<!-- Google Search ke liye Site Name (Render ki jagah Smiley Chat dikhane ke liye) -->
+    <link rel="icon" type="image/png" href="/favicon.png">
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="eXiIFlxKzFtJCZcu9pGaqgZqZcnjdzaQQV1JP9Ss8WA" />
-    <!-- 🌟 Google SEO & Branding Tags -->
+    
     <title>Smiley Chat - Random Video Chat with Strangers</title>
     <meta name="description" content="Smiley Chat is the ultimate random video chat platform to meet strangers instantly with HD quality and secure connection.">
     <meta name="keywords" content="Smiley Chat, smiley chat, random video chat, talk to strangers, smiley video call">
@@ -25,13 +22,13 @@
         .chat-scroll::-webkit-scrollbar-thumb { background: rgba(96, 100, 108, 0.2); border-radius: 4px; }
     </style>
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Smiley Chat",
-  "url": "https://smiley-x3xp.onrender.com/"
-}
-</script>
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Smiley Chat",
+      "url": "https://smiley-x3xp.onrender.com/"
+    }
+    </script>
 </head>
 <body class="h-screen w-screen flex items-center justify-center p-2 text-slate-100 font-sans">
 
@@ -39,17 +36,20 @@
         
         <header class="bg-slate-800/60 p-4 flex justify-between items-center border-b border-slate-800">
             <div>
-                <!-- 🌟 Branding Updated to Smiley Chat -->
                 <h1 class="font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-red-400 to-purple-400">Smiley Chat</h1>
                 <p class="text-xs text-slate-400 flex gap-2 items-center mt-1">
                     <span class="inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
                     <span class="text-emerald-400 font-mono">Status: Engines Synchronized</span> 
                 </p>
             </div>
-            <select id="call-mode" class="bg-slate-800 text-xs rounded p-1 text-white border border-slate-700 outline-none">
-                <option value="video"> 📹 Video + 📞Audio</option>
-                <option value="audio">📞 Audio Only</option>
-            </select>
+            <div class="flex items-center gap-2">
+                <button id="report-btn" onclick="reportStranger()" class="hidden bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold py-1 px-2.5 rounded transition">🚩 Report</button>
+                
+                <select id="call-mode" class="bg-slate-800 text-xs rounded p-1 text-white border border-slate-700 outline-none">
+                    <option value="video"> 📹 Video + 📞Audio</option>
+                    <option value="audio">📞 Audio Only</option>
+                </select>
+            </div>
         </header>
         
         <section id="status-banner" class="bg-slate-950/80 text-cyan-400 text-center py-2 text-xs font-mono border-b border-slate-800">
@@ -100,6 +100,10 @@
     
         <footer class="p-3 bg-slate-900/90 border-t border-slate-800 flex items-center gap-2">
             <button id="action-btn" onclick="toggleSearch()" class="px-4 py-3.5 bg-gray-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition shadow-md whitespace-nowrap">🔍 Find Partner</button>
+            
+            <label for="imageInput" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-3.5 rounded-xl border border-slate-700 text-sm flex items-center justify-center transition">📸</label>
+            <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+
             <input id="chat-input" type="text" placeholder="Type text..." oninput="handleTyping()" onkeypress="handleKey(event)" class="flex-1 px-4 py-3.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-sm text-slate-100 focus:border-cyan-500">
             <button id="voice-btn" onclick="toggleVoiceNote()" class="px-3.5 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-lg border border-slate-700">🎙️</button>
             <button id="send-btn" onclick="sendMsg()" class="px-5 py-3.5 bg-gray-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-md">Send</button>
@@ -116,6 +120,24 @@
 
         let selectedReplyMsgId = null;
         let selectedEditMsgId = null;
+
+        // 🌟 Bad Words Dictionary List
+        const badWords = ["abuse1", "abuse2", "gali1", "gali2", "chutiya", "bhenchod", "gand"];
+
+        // 🌟 Helper validation functions
+        function containsLink(text) {
+            const urlPattern = /(https?:\/\/[^\s]+)|([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/ig;
+            return urlPattern.test(text);
+        }
+
+        function filterBadWords(text) {
+            let cleanText = text;
+            badWords.forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                cleanText = cleanText.replace(regex, "****");
+            });
+            return cleanText;
+        }
 
         const configuration = {
           iceServers: [
@@ -151,6 +173,7 @@
         const sendBtn = document.getElementById("send-btn");
         const replyPreviewBox = document.getElementById("reply-preview-box");
         const replyPreviewText = document.getElementById("reply-preview-text");
+        const reportBtn = document.getElementById("report-btn");
 
         async function startMedia() {
             const useVideo = (document.getElementById("call-mode").value === "video");
@@ -195,6 +218,7 @@
                 actionBtn.className = "px-4 py-3.5 bg-red-600 text-white font-bold rounded-xl text-sm";
                 statusBanner.innerText = "Scanning active channels...";
                 socket.emit('find-partner', { mode: document.getElementById("call-mode").value });
+                reportBtn.classList.add("hidden");
             } else { resetConnection(); socket.emit('skip'); }
         }
 
@@ -204,6 +228,7 @@
             actionBtn.className = "px-4 py-3.5 bg-amber-600 text-white font-bold rounded-xl text-sm";
             statusBanner.innerText = "🎯 Partner linked! Communications active.";
             messagesContainer.innerHTML = `<div class="text-xs text-center text-slate-600">Secure link established.</div>`;
+            reportBtn.classList.remove("hidden"); // Show report button on connection
             createPeerConnection(data.isInitiator);
         });
 
@@ -267,8 +292,17 @@
 
         function sendMsg() {
             if (chatInput.value.trim() && isConnected) {
-                const val = chatInput.value;
+                let val = chatInput.value.trim();
                 
+                // Security Check 1: Block Links
+                if (containsLink(val)) {
+                    alert("Links share karna allowed nahi hai!");
+                    return;
+                }
+
+                // Security Check 2: Censor Bad Words
+                val = filterBadWords(val);
+
                 if (selectedEditMsgId) {
                     socket.emit('edit-message', { msgId: selectedEditMsgId, newText: val });
                     updateLocalMsgUI(selectedEditMsgId, val);
@@ -289,6 +323,53 @@
                 
                 chatInput.value = '';
                 socket.emit('typing-state', false);
+            }
+        }
+
+        // 📸 Handle Photo Selection, Size validation and Transmit
+        function handleImageUpload(e) {
+            if (!isConnected) return;
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 1024 * 1024) { // 1MB buffer allocation check
+                    alert("Kripya 1MB se choti size ki photo share karein.");
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64Image = event.target.result;
+                    socket.emit('send-image', base64Image); // Broadcast event
+                    appendImageElement(base64Image, 'me'); // Attach locally
+                };
+                reader.readAsDataURL(file);
+                e.target.value = ''; // clean input buffer
+            }
+        }
+
+        socket.on('receive-image', (base64Image) => {
+            appendImageElement(base64Image, 'stranger');
+        });
+
+        function appendImageElement(src, sender) {
+            let box = document.createElement('div');
+            box.className = `max-w-[70%] p-1 bg-slate-900 border rounded-xl shadow-md ${sender === 'me' ? 'bg-indigo-600 border-indigo-500 self-end' : 'bg-slate-800 border-slate-700 self-start'}`;
+            let img = document.createElement('img');
+            img.src = src;
+            img.className = "rounded-lg max-h-60 object-contain";
+            box.appendChild(img);
+            messagesContainer.appendChild(box);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 🚩 Trigger User Reporting and Block pipeline
+        function reportStranger() {
+            if(confirm("Kya aap is stranger ko report karke permanent block karna chahte hain?")) {
+                socket.emit('report-stranger');
+                resetConnection();
+                let d = document.createElement('div');
+                d.className = "self-center bg-red-950/40 text-xs px-3 py-1 rounded text-red-400 italic";
+                d.innerText = "Aapne stranger ko block kar diya hai.";
+                messagesContainer.appendChild(d);
             }
         }
 
@@ -430,6 +511,7 @@
             remoteStream = null;
             isConnected = false; isSearching = false;
             typingIndicator.classList.add("hidden");
+            reportBtn.classList.add("hidden"); // Hide report btn on disconnection
             cancelReply();
             cancelEdit();
             actionBtn.innerText = "🔍 Find Partner";
