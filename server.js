@@ -2,17 +2,18 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const app = express();
+
+// Set static files support (serve index.html from same folder)
 app.use(express.static(__dirname));
+
 const server = http.createServer(app);
 const io = new Server(server, { 
-    cors: { origin: "*" } 
+    cors: { origin: "*" },
+    maxHttpBufferSize: 2e6 // 🌟 2MB Buffer limit set kiya hai taaki photo upload crash na ho
 });
 
-// Static files support (serve index.html from same folder)
-app.use(express.static(__dirname));
-
 // Masking dictionary for moderation
-const badWords = ['fuck', 'bitch', 'chutiya', 'saala', 'asshole', 'bastard'];
+const badWords = ['fuck', 'bitch', 'chutiya', 'saala', 'asshole', 'bastard', 'gali1', 'gali2', 'bhenchod', 'gand'];
 
 function maskBadWords(text) {
     if (!text) return "";
@@ -26,17 +27,35 @@ function maskBadWords(text) {
     });
     return cleanText;
 }
+
+// 🌟 Server side Link Detection (Double Security Check)
+function containsLink(text) {
+    if (!text) return false;
+    const urlPattern = /(https?:\/\/[^\s]+)|([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/ig;
+    return urlPattern.test(text);
+}
+
 app.get('/googledf5bde9b8612d08a.html', (req, res) => {
     res.send('google-site-verification: googledf5bde9b8612d08a.html');
 });
+
 // Global active channels routing pools
 let waitingUsers = { all: [], male: [], female: [] };
+
+// 🌟 Server RAM buffer block reported sockets tracking
+const reportedUsers = new Set();
 
 io.on('connection', (socket) => {
     console.log('User connected safely:', socket.id);
 
     // 🔍 Matchmaker Engine
     socket.on('find-partner', (data) => {
+        // 🚩 Safety Check: Block reported sockets from entering queue
+        if (reportedUsers.has(socket.id)) {
+            socket.emit('partner-disconnected', 'Aapko bohot se users ne report kiya hai. Matchmaking blocked.');
+            return;
+        }
+
         const gender = data.gender || 'all';
         const targetGender = data.targetGender || 'all';
         
@@ -44,12 +63,19 @@ io.on('connection', (socket) => {
         socket.targetGender = targetGender;
 
         let pool = waitingUsers[targetGender] || waitingUsers['all'];
-        // Find match avoiding connecting user to themselves
-        let partnerSocket = pool.find(s => s.id !== socket.id && (s.targetGender === 'all' || s.targetGender === socket.gender));
+        
+        // Find match avoiding connecting user to themselves AND checking reported list tracker
+        let partnerSocket = pool.find(s => 
+            s.id !== socket.id && 
+            !reportedUsers.has(s.id) &&
+            (s.targetGender === 'all' || s.targetGender === socket.gender)
+        );
 
         if (partnerSocket) {
-            // Remove match from waiting queue
-            waitingUsers[targetGender] = pool.filter(s => s.id !== partnerSocket.id);
+            // Remove match from waiting queue matrix
+            for (let g in waitingUsers) {
+                waitingUsers[g] = waitingUsers[g].filter(s => s.id !== partnerSocket.id);
+            }
             
             // Core link binding
             socket.partner = partnerSocket;
@@ -60,13 +86,22 @@ io.on('connection', (socket) => {
             partnerSocket.emit('matched', { isInitiator: false });
             console.log(`🎯 Link established between ${socket.id} & ${partnerSocket.id}`);
         } else {
+            // Double check duplication listing clean
+            for (let g in waitingUsers) {
+                waitingUsers[g] = waitingUsers[g].filter(s => s.id !== socket.id);
+            }
             waitingUsers[gender].push(socket);
         }
     });
 
-    // 💬 Core Messaging Block with Badword Moderation
+    // 💬 Core Messaging Block with Badword & Link Moderation
     socket.on('text-message', (payload) => {
         if (socket.partner) {
+            // 🚫 Link Blocking Rule (If link found, drop transmission packet)
+            if (containsLink(payload.text) || containsLink(payload.replyToText)) {
+                return; 
+            }
+
             // Filter user input string before transmission
             payload.text = maskBadWords(payload.text);
             if (payload.replyToText) {
@@ -76,9 +111,35 @@ io.on('connection', (socket) => {
         }
     });
 
+    // 📸 High-Speed Photo Data Route Pipe
+    socket.on('send-image', (base64Image) => {
+        if (socket.partner) {
+            socket.partner.emit('receive-image', base64Image);
+        }
+    });
+
+    // 🚩 Permanent Report and Instant Kick Execution
+    socket.on('report-stranger', () => {
+        const badPartner = socket.partner;
+        if (badPartner) {
+            reportedUsers.add(badPartner.id); // Add offender to block-list
+            console.log(`🚩 User ${badPartner.id} was blacklisted by reports.`);
+            
+            badPartner.emit('partner-disconnected');
+            badPartner.partner = null;
+            
+            // Instantly clean up offender from all routing matrices
+            for (let g in waitingUsers) {
+                waitingUsers[g] = waitingUsers[g].filter(s => s.id !== badPartner.id);
+            }
+        }
+        socket.partner = null;
+    });
+
     // ✏️ Live Edit Synchronization 
     socket.on('edit-message', (data) => {
         if (socket.partner) {
+            if (containsLink(data.newText)) return; // Link secure drop
             data.newText = maskBadWords(data.newText);
             socket.partner.emit('edit-message', data);
         }
@@ -126,7 +187,10 @@ io.on('connection', (socket) => {
     };
 
     socket.on('skip', disconnectUser);
-    socket.on('disconnect', disconnectUser);
+    socket.on('disconnect', () => {
+        disconnectUser();
+        reportedUsers.delete(socket.id); // clean stack allocation memory on socket close
+    });
 });
 
 const PORT = process.env.PORT || 3000;
