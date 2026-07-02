@@ -4,7 +4,7 @@
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google-site-verification" content="eXiIFlxKzFtJCZcu9pGaqgZqZcnjdzaQQV1JP9Ss8WA" />
     
     <title>Smiley Chat - Random Video Chat with Strangers</title>
@@ -17,9 +17,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { background: linear-gradient(135deg, #f8fcf2, #2c2b2a); }
+        /* 📱 Mobile Dynamic Viewport Fixes */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        body { 
+            background: linear-gradient(135deg, #f8fcf2, #2c2b2a); 
+            height: 100vh;
+            height: -webkit-fill-available;
+        }
         .chat-scroll::-webkit-scrollbar { width: 6px; }
         .chat-scroll::-webkit-scrollbar-thumb { background: rgba(96, 100, 108, 0.2); border-radius: 4px; }
+        
+        /* Smooth sizing transitions */
+        #main-card {
+            height: 100%;
+        }
+        @media (min-width: 640px) {
+            #main-card {
+                height: 96vh;
+            }
+        }
     </style>
     <script type="application/ld+json">
     {
@@ -30,48 +51,53 @@
     }
     </script>
 </head>
-<body class="h-screen w-screen flex items-center justify-center p-2 text-slate-100 font-sans">
+<body class="w-screen flex items-center justify-center sm:p-2 text-slate-100 font-sans antialiased select-none">
 
-    <div id="main-card" class="w-full max-w-xl bg-slate-900/95 backdrop-blur-lg rounded-2xl shadow-2xl flex flex-col h-[96vh] max-h-[820px] overflow-hidden border border-slate-800">
+    <div id="main-card" class="w-full max-w-xl bg-slate-900/95 backdrop-blur-lg sm:rounded-2xl shadow-2xl flex flex-col max-h-none sm:max-h-[820px] overflow-hidden border-0 sm:border border-slate-800">
         
-        <header class="bg-slate-800/60 p-4 flex justify-between items-center border-b border-slate-800">
+        <header class="bg-slate-800/60 p-3 sm:p-4 flex justify-between items-center border-b border-slate-800 shrink-0">
             <div>
-                <h1 class="font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-red-400 to-purple-400">Smiley Chat</h1>
-                <p class="text-xs text-slate-400 flex gap-2 items-center mt-1">
-                    <span class="inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                <h1 class="font-black text-lg sm:text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-red-400 to-purple-400">Smiley Chat</h1>
+                <p class="text-[10px] sm:text-xs text-slate-400 flex gap-2 items-center mt-0.5">
+                    <span class="inline-block w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                     <span class="text-emerald-400 font-mono">Status: Engines Synchronized</span> 
                 </p>
             </div>
-            <div class="flex items-center gap-2">
-                <button id="report-btn" onclick="reportStranger()" class="hidden bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold py-1 px-2.5 rounded transition">🚩 Report</button>
+            <div class="flex items-center gap-1.5">
+                <button id="report-btn" onclick="reportStranger()" class="hidden bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-1 px-2 rounded transition">🚩 Report</button>
                 
-                <select id="call-mode" class="bg-slate-800 text-xs rounded p-1 text-white border border-slate-700 outline-none">
-                    <option value="video"> 📹 Video + 📞Audio</option>
-                    <option value="audio">📞 Audio Only</option>
-                </select>
+                <div class="relative flex items-center bg-slate-800 rounded-lg border border-slate-700 pl-2 pr-0.5 py-0.5">
+                    <svg class="w-4 h-4 text-cyan-400 animate-pulse mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 002-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    <select id="call-mode" class="bg-transparent text-[11px] sm:text-xs text-white outline-none pr-1 cursor-pointer font-medium">
+                        <option value="video" class="bg-slate-900">Video + Audio</option>
+                        <option value="audio" class="bg-slate-900">Audio Only</option>
+                    </select>
+                </div>
             </div>
         </header>
         
-        <section id="status-banner" class="bg-slate-950/80 text-cyan-400 text-center py-2 text-xs font-mono border-b border-slate-800">
+        <section id="status-banner" class="bg-slate-950/80 text-cyan-400 text-center py-1.5 text-[11px] font-mono border-b border-slate-800 shrink-0">
              Press Find Partner to start ⚡
         </section>
 
-        <section id="video-grid" class="grid grid-cols-2 gap-2 p-2 bg-black/40 border-b border-slate-800">
-            <div class="relative bg-slate-950 rounded-xl overflow-hidden h-40 border border-slate-800">
+        <section id="video-grid" class="grid grid-cols-2 gap-2 p-2 bg-black/40 border-b border-slate-800 shrink-0">
+            <div class="relative bg-slate-950 rounded-xl overflow-hidden h-28 sm:h-40 border border-slate-800">
                 <video id="local-video" autoplay playsinline muted class="w-full h-full object-cover" style="transform: scaleX(-1);"></video>
                 <div id="audio-only-local" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 text-xs">🎤 Mic Active</div>
                 <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-slate-300 text-[10px] px-2 py-0.5 rounded-md">You</span>
             </div>
-            <div class="relative bg-slate-950 rounded-xl overflow-hidden h-40 border border-slate-800">
+            <div class="relative bg-slate-950 rounded-xl overflow-hidden h-28 sm:h-40 border border-slate-800">
                 <video id="remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
                 <div id="audio-only-remote" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 text-xs">🔊 Stranger Connected</div>
                 <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-slate-300 text-[10px] px-2 py-0.5 rounded-md">Stranger</span>
             </div>
         </section>
 
-        <section id="messages-container" class="flex-1 p-4 overflow-y-auto chat-scroll flex flex-col gap-3 bg-slate-950/10"></section>
+        <section id="messages-container" class="flex-1 p-3 overflow-y-auto chat-scroll flex flex-col gap-2.5 bg-slate-950/10"></section>
 
-         <div id="reply-preview-box" class="hidden px-4 py-2 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-300 flex justify-between items-center">
+         <div id="reply-preview-box" class="hidden px-4 py-2 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-300 flex justify-between items-center shrink-0">
             <div>
                 <span class="font-bold text-cyan-400">Replying to: </span>
                 <span id="reply-preview-text" class="italic">Message context...</span>
@@ -79,12 +105,12 @@
             <button onclick="cancelReply()" class="text-red-400 font-bold hover:text-red-300">✕</button>
          </div>
 
-         <div id="typing-indicator" class="hidden px-4 py-1.5 text-xs text-cyan-400 font-medium italic bg-slate-950/40 flex items-center gap-1.5 border-t border-slate-800/40">
+         <div id="typing-indicator" class="hidden px-4 py-1.5 text-xs text-cyan-400 font-medium italic bg-slate-950/40 flex items-center gap-1.5 border-t border-slate-800/40 shrink-0">
             <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></span>
             <span>Stranger is typing...</span>
          </div>
         
-         <section class="px-3 py-1.5 bg-slate-950/50 flex gap-3 border-t border-slate-800 overflow-x-auto text-sm">
+         <section class="px-2.5 py-1.5 bg-slate-950/50 flex gap-3 border-t border-slate-800 overflow-x-auto text-sm shrink-0">
              <button onclick="insertEmoji('😂')" class="hover:scale-125 transition">😂</button>
              <button onclick="insertEmoji('🔥')" class="hover:scale-125 transition">🔥</button>
              <button onclick="insertEmoji('😍')" class="hover:scale-125 transition">😍</button>
@@ -98,15 +124,15 @@
              <button onclick="insertEmoji('🤞')" class="hover:scale-125 transition">🤞</button>
          </section>
     
-        <footer class="p-3 bg-slate-900/90 border-t border-slate-800 flex items-center gap-2">
-            <button id="action-btn" onclick="toggleSearch()" class="px-4 py-3.5 bg-gray-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition shadow-md whitespace-nowrap">🔍 Find Partner</button>
+        <footer class="p-2 sm:p-3 bg-slate-900/90 border-t border-slate-800 flex items-center gap-1.5 shrink-0">
+            <button id="action-btn" onclick="toggleSearch()" class="px-3 sm:px-4 py-3 bg-gray-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm transition shadow-md whitespace-nowrap">🔍 Find Partner</button>
             
-            <label for="imageInput" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-3.5 rounded-xl border border-slate-700 text-sm flex items-center justify-center transition">📸</label>
+            <label for="imageInput" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-3 rounded-xl border border-slate-700 text-xs sm:text-sm flex items-center justify-center transition">📸</label>
             <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
 
-            <input id="chat-input" type="text" placeholder="Type text..." oninput="handleTyping()" onkeypress="handleKey(event)" class="flex-1 px-4 py-3.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-sm text-slate-100 focus:border-cyan-500">
-            <button id="voice-btn" onclick="toggleVoiceNote()" class="px-3.5 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-lg border border-slate-700">🎙️</button>
-            <button id="send-btn" onclick="sendMsg()" class="px-5 py-3.5 bg-gray-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-md">Send</button>
+            <input id="chat-input" type="text" placeholder="Type text..." oninput="handleTyping()" onkeypress="handleKey(event)" class="flex-1 px-3 py-3 bg-slate-800 border border-slate-700 rounded-xl outline-none text-xs sm:text-sm text-slate-100 focus:border-cyan-500">
+            <button id="voice-btn" onclick="toggleVoiceNote()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-base border border-slate-700">🎙️</button>
+            <button id="send-btn" onclick="sendMsg()" class="px-4 py-3 bg-gray-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md">Send</button>
         </footer>
         
     </div>
@@ -121,10 +147,8 @@
         let selectedReplyMsgId = null;
         let selectedEditMsgId = null;
 
-        // 🌟 Bad Words Dictionary List
         const badWords = ["abuse1", "abuse2", "gali1", "gali2", "chutiya", "bhenchod", "gand"];
 
-        // 🌟 Helper validation functions
         function containsLink(text) {
             const urlPattern = /(https?:\/\/[^\s]+)|([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/ig;
             return urlPattern.test(text);
@@ -180,11 +204,18 @@
             document.getElementById("audio-only-local").style.display = useVideo ? "none" : "flex";
             document.getElementById("audio-only-remote").style.display = useVideo ? "none" : "flex";
             
+            // 🌟 Advanced Noise, Echo & Loop Cancellation Algorithm Applied
+            const advancedAudioConstraints = {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            };
+            
             try {
                 if(!localStream) {
                     localStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: useVideo ? { width: 640, height: 480, frameRate: 30 } : false, 
-                        audio: true 
+                        video: useVideo ? { width: 640, height: 480, frameRate: 30, facingMode: "user" } : false, 
+                        audio: advancedAudioConstraints
                     });
                     document.getElementById('local-video').srcObject = localStream;
                 } else {
@@ -198,12 +229,12 @@
                     });
                 }
             } catch (err) { 
-                console.warn("Retrying with flexible constraints...", err);
+                console.warn("Retrying media pipelines...", err);
                 try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ video: useVideo, audio: true });
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: useVideo, audio: advancedAudioConstraints });
                     document.getElementById('local-video').srcObject = localStream;
                 } catch(e) {
-                    alert("Please turn on Camera and Mic permission manually from site settings!");
+                    alert("Please turn on Camera and Mic permissions manually!");
                 }
             }
         }
@@ -215,7 +246,7 @@
             if (!isSearching && !isConnected) {
                 isSearching = true;
                 actionBtn.innerText = "🛑 Stop";
-                actionBtn.className = "px-4 py-3.5 bg-red-600 text-white font-bold rounded-xl text-sm";
+                actionBtn.className = "px-3 sm:px-4 py-3 bg-red-600 text-white font-bold rounded-xl text-xs sm:text-sm";
                 statusBanner.innerText = "Scanning active channels...";
                 socket.emit('find-partner', { mode: document.getElementById("call-mode").value });
                 reportBtn.classList.add("hidden");
@@ -225,10 +256,10 @@
         socket.on('matched', (data) => {
             isConnected = true; isSearching = false;
             actionBtn.innerText = "❌ Skip";
-            actionBtn.className = "px-4 py-3.5 bg-amber-600 text-white font-bold rounded-xl text-sm";
+            actionBtn.className = "px-3 sm:px-4 py-3 bg-amber-600 text-white font-bold rounded-xl text-xs sm:text-sm";
             statusBanner.innerText = "🎯 Partner linked! Communications active.";
             messagesContainer.innerHTML = `<div class="text-xs text-center text-slate-600">Secure link established.</div>`;
-            reportBtn.classList.remove("hidden"); // Show report button on connection
+            reportBtn.classList.remove("hidden");
             createPeerConnection(data.isInitiator);
         });
 
@@ -294,13 +325,11 @@
             if (chatInput.value.trim() && isConnected) {
                 let val = chatInput.value.trim();
                 
-                // Security Check 1: Block Links
                 if (containsLink(val)) {
                     alert("Links share karna allowed nahi hai!");
                     return;
                 }
 
-                // Security Check 2: Censor Bad Words
                 val = filterBadWords(val);
 
                 if (selectedEditMsgId) {
@@ -326,23 +355,22 @@
             }
         }
 
-        // 📸 Handle Photo Selection, Size validation and Transmit
         function handleImageUpload(e) {
             if (!isConnected) return;
             const file = e.target.files[0];
             if (file) {
-                if (file.size > 1024 * 1024) { // 1MB buffer allocation check
+                if (file.size > 1024 * 1024) {
                     alert("Kripya 1MB se choti size ki photo share karein.");
                     return;
                 }
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const base64Image = event.target.result;
-                    socket.emit('send-image', base64Image); // Broadcast event
-                    appendImageElement(base64Image, 'me'); // Attach locally
+                    socket.emit('send-image', base64Image);
+                    appendImageElement(base64Image, 'me');
                 };
                 reader.readAsDataURL(file);
-                e.target.value = ''; // clean input buffer
+                e.target.value = '';
             }
         }
 
@@ -361,7 +389,6 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // 🚩 Trigger User Reporting and Block pipeline
         function reportStranger() {
             if(confirm("Kya aap is stranger ko report karke permanent block karna chahte hain?")) {
                 socket.emit('report-stranger');
@@ -478,11 +505,11 @@
                         }
                     };
                     mediaRecorder.start(); isRecordingVoice = true;
-                    voiceBtn.innerText = "🛑"; voiceBtn.className = "px-3.5 py-3.5 bg-red-600 text-white rounded-xl text-lg animate-pulse";
+                    voiceBtn.innerText = "🛑"; voiceBtn.className = "px-2.5 py-2.5 bg-red-600 text-white rounded-xl text-base animate-pulse";
                 } catch (err) { alert("Mic connection needed!"); }
             } else {
                 mediaRecorder.stop(); isRecordingVoice = false;
-                voiceBtn.innerText = "🎙️"; voiceBtn.className = "px-3.5 py-3.5 bg-slate-800 text-slate-300 rounded-xl text-lg border border-slate-700";
+                voiceBtn.innerText = "🎙️"; voiceBtn.className = "px-2.5 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-base border border-slate-700";
             }
         }
 
@@ -511,11 +538,11 @@
             remoteStream = null;
             isConnected = false; isSearching = false;
             typingIndicator.classList.add("hidden");
-            reportBtn.classList.add("hidden"); // Hide report btn on disconnection
+            reportBtn.classList.add("hidden");
             cancelReply();
             cancelEdit();
             actionBtn.innerText = "🔍 Find Partner";
-            actionBtn.className = "px-4 py-3.5 bg-indigo-600 text-white font-bold rounded-xl text-sm";
+            actionBtn.className = "px-3 sm:px-4 py-3 bg-indigo-600 text-white font-bold rounded-xl text-xs sm:text-sm";
             statusBanner.innerText = "Connection reset.";
         }
 
@@ -535,7 +562,7 @@
             }
 
             let bubble = document.createElement('div');
-            bubble.className = `px-4 py-2 rounded-xl text-sm relative break-words w-full ${sender === 'me' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-white'}`;
+            bubble.className = `px-4 py-2 rounded-xl text-xs sm:text-sm relative break-words w-full ${sender === 'me' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-white'}`;
             
             let textSpan = document.createElement('span');
             textSpan.id = `text-${msgId}`;
