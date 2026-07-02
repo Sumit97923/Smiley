@@ -9,7 +9,7 @@ app.use(express.static(__dirname));
 const server = http.createServer(app);
 const io = new Server(server, { 
     cors: { origin: "*" },
-    maxHttpBufferSize: 2e6 // 🌟 2MB Buffer limit set kiya hai taaki photo upload crash na ho
+    maxHttpBufferSize: 2e6 // 🌟 2MB Buffer limit taaki images/audio par node crash na ho
 });
 
 // Masking dictionary for moderation
@@ -39,7 +39,7 @@ app.get('/googledf5bde9b8612d08a.html', (req, res) => {
     res.send('google-site-verification: googledf5bde9b8612d08a.html');
 });
 
-// Global active channels routing pools
+// Global active channels routing pools including calling modes configuration map
 let waitingUsers = { all: [], male: [], female: [] };
 
 // 🌟 Server RAM buffer block reported sockets tracking
@@ -48,7 +48,7 @@ const reportedUsers = new Set();
 io.on('connection', (socket) => {
     console.log('User connected safely:', socket.id);
 
-    // 🔍 Matchmaker Engine
+    // 🔍 Matchmaker Engine Optimized with WebRTC Streams Pipeline Alignment
     socket.on('find-partner', (data) => {
         // 🚩 Safety Check: Block reported sockets from entering queue
         if (reportedUsers.has(socket.id)) {
@@ -56,16 +56,18 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Mobile fallback variables safe management
+        // Mobile fallback and call modes tracking allocation
         const gender = data.gender || 'all';
         const targetGender = data.targetGender || 'all';
+        const mode = data.mode || 'video'; // Tracking mode to align SDP pipelines smoothly
         
         socket.gender = gender;
         socket.targetGender = targetGender;
+        socket.callMode = mode;
 
         let pool = waitingUsers[targetGender] || waitingUsers['all'];
         
-        // Find match avoiding connecting user to themselves AND checking reported list tracker
+        // Find match avoiding connecting user to themselves, matching filters and checking reported list tracker
         let partnerSocket = pool.find(s => 
             s.id !== socket.id && 
             !reportedUsers.has(s.id) &&
@@ -82,9 +84,9 @@ io.on('connection', (socket) => {
             socket.partner = partnerSocket;
             partnerSocket.partner = socket;
 
-            // Trigger handshake pipelines on frontend
-            socket.emit('matched', { isInitiator: true });
-            partnerSocket.emit('matched', { isInitiator: false });
+            // Trigger handshake pipelines on frontend with synced stream variables
+            socket.emit('matched', { isInitiator: true, mode: partnerSocket.callMode });
+            partnerSocket.emit('matched', { isInitiator: false, mode: socket.callMode });
             console.log(`🎯 Link established between ${socket.id} & ${partnerSocket.id}`);
         } else {
             // Double check duplication listing clean
@@ -161,7 +163,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 📹 WebRTC Multi-stream Ice Signaling Layer
+    // 📹 WebRTC Multi-stream Ice Signaling Layer (Crucial for Audio/Video synchronization)
     socket.on('signal', (data) => {
         if (socket.partner) {
             socket.partner.emit('signal', data);
@@ -191,7 +193,7 @@ io.on('connection', (socket) => {
     socket.on('skip', disconnectUser);
     socket.on('disconnect', () => {
         disconnectUser();
-        reportedUsers.delete(socket.id); // clean stack allocation memory on socket close
+        reportedUsers.delete(socket.id); // Clean stack allocation memory on socket close
     });
 });
 
