@@ -56,6 +56,7 @@ io.on('connection', (socket) => {
             return;
         }
 
+        // Mobile fallback variables safe management
         const gender = data.gender || 'all';
         const targetGender = data.targetGender || 'all';
         
@@ -90,6 +91,7 @@ io.on('connection', (socket) => {
             for (let g in waitingUsers) {
                 waitingUsers[g] = waitingUsers[g].filter(s => s.id !== socket.id);
             }
+            if (!waitingUsers[gender]) waitingUsers[gender] = [];
             waitingUsers[gender].push(socket);
         }
     });
