@@ -6,6 +6,17 @@ const app = express();
 // Set static files support (serve index.html from same folder)
 app.use(express.static(__dirname));
 
+// 🗺️ SEO & Verification Routes (Added for Sitemap & Robots)
+const path = require('path');
+
+app.get('/robots.txt', (req, res) => {
+    res.sendFile(path.join(__dirname, 'robots.txt'));
+});
+
+app.get('/sitemap.xml', (req, res) => {
+    res.sendFile(path.join(__dirname, 'sitemap.xml'));
+});
+
 const server = http.createServer(app);
 const io = new Server(server, { 
     cors: { origin: "*" },
