@@ -14,6 +14,10 @@
     <meta property="og:site_name" content="Smiley Chat">
     <meta name="apple-mobile-web-app-title" content="Smiley Chat">
     
+    <!-- 🗺️ SEO Crawler Paths (Discovered by Search Engines) -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+    <link rel="author" type="text/plain" href="/robots.txt" />
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/socket.io/socket.io.js"></script>
     <style>
@@ -72,7 +76,7 @@
 </head>
 <body class="w-screen flex items-center justify-center sm:p-2 text-slate-100 font-sans antialiased select-none">
 
-    <div id="main-card" class="w-full max-w-xl bg-slate-900/95 backdrop-blur-lg sm:rounded-2xl shadow-2xl flex flex-col max-h-none sm:max-h-[820px] overflow-hidden border-0 sm:border border-slate-800">
+    <div id="main-card" role="main" class="w-full max-w-xl bg-slate-900/95 backdrop-blur-lg sm:rounded-2xl shadow-2xl flex flex-col max-h-none sm:max-h-[820px] overflow-hidden border-0 sm:border border-slate-800">
         
         <header class="bg-slate-800/60 p-3 sm:p-4 flex justify-between items-center border-b border-slate-800 shrink-0">
             <div>
@@ -83,13 +87,13 @@
                 </p>
             </div>
             <div class="flex items-center gap-1.5">
-                <button id="report-btn" onclick="reportStranger()" class="hidden bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-1 px-2 rounded transition">🚩 Report</button>
+                <button id="report-btn" onclick="reportStranger()" class="hidden bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-1 px-2 rounded transition" aria-label="Report current stranger">🚩 Report</button>
                 
                 <div class="relative flex items-center bg-slate-800 rounded-lg border border-slate-700 pl-2 pr-0.5 py-0.5">
-                    <svg class="w-4 h-4 text-cyan-400 animate-pulse mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="w-4 h-4 text-cyan-400 animate-pulse mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 002-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                     </svg>
-                    <select id="call-mode" class="bg-transparent text-[11px] sm:text-xs text-white outline-none pr-1 cursor-pointer font-medium">
+                    <select id="call-mode" class="bg-transparent text-[11px] sm:text-xs text-white outline-none pr-1 cursor-pointer font-medium" aria-label="Select calling mode">
                         <option value="video" class="bg-slate-900">Video + Audio</option>
                         <option value="audio" class="bg-slate-900">Audio Only</option>
                     </select>
@@ -97,61 +101,61 @@
             </div>
         </header>
         
-        <section id="status-banner" class="bg-slate-950/80 text-cyan-400 text-center py-1.5 text-[11px] font-mono border-b border-slate-800 shrink-0">
+        <section id="status-banner" role="status" class="bg-slate-950/80 text-cyan-400 text-center py-1.5 text-[11px] font-mono border-b border-slate-800 shrink-0">
              Press Find Partner to start ⚡
         </section>
 
         <section id="video-grid" class="grid grid-cols-2 gap-2 p-2 bg-black/40 border-b border-slate-800 shrink-0">
             <div class="video-box-frame">
-                <video id="local-video" autoplay playsinline muted style="transform: scaleX(-1);"></video>
+                <video id="local-video" autoplay playsinline muted style="transform: scaleX(-1);" aria-label="Your local camera feed"></video>
                 <div id="audio-only-local" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 text-xs">🎤 Mic Active</div>
                 <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-slate-300 text-[10px] px-2 py-0.5 rounded-md">You</span>
             </div>
             <div class="video-box-frame">
-                <video id="remote-video" autoplay playsinline></video>
+                <video id="remote-video" autoplay playsinline aria-label="Stranger remote camera feed"></video>
                 <div id="audio-only-remote" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 text-xs">🔊 Stranger Connected</div>
                 <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-slate-300 text-[10px] px-2 py-0.5 rounded-md">Stranger</span>
             </div>
         </section>
 
-        <section id="messages-container" class="flex-1 p-3 overflow-y-auto chat-scroll flex flex-col gap-2.5 bg-slate-950/10"></section>
+        <section id="messages-container" aria-live="polite" aria-label="Chat messages history" class="flex-1 p-3 overflow-y-auto chat-scroll flex flex-col gap-2.5 bg-slate-950/10"></section>
 
          <div id="reply-preview-box" class="hidden px-4 py-2 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-300 flex justify-between items-center shrink-0">
             <div>
                 <span class="font-bold text-cyan-400">Replying to: </span>
                 <span id="reply-preview-text" class="italic">Message context...</span>
             </div>
-            <button onclick="cancelReply()" class="text-red-400 font-bold hover:text-red-300">✕</button>
+            <button onclick="cancelReply()" class="text-red-400 font-bold hover:text-red-300" aria-label="Cancel reply option">✕</button>
          </div>
 
-         <div id="typing-indicator" class="hidden px-4 py-1.5 text-xs text-cyan-400 font-medium italic bg-slate-950/40 flex items-center gap-1.5 border-t border-slate-800/40 shrink-0">
+         <div id="typing-indicator" aria-live="assertive" class="hidden px-4 py-1.5 text-xs text-cyan-400 font-medium italic bg-slate-950/40 flex items-center gap-1.5 border-t border-slate-800/40 shrink-0">
             <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></span>
             <span>Stranger is typing...</span>
          </div>
         
-         <section class="px-2.5 py-1.5 bg-slate-950/50 flex gap-3 border-t border-slate-800 overflow-x-auto text-sm shrink-0">
-             <button onclick="insertEmoji('😂')" class="hover:scale-125 transition">😂</button>
-             <button onclick="insertEmoji('🔥')" class="hover:scale-125 transition">🔥</button>
-             <button onclick="insertEmoji('😍')" class="hover:scale-125 transition">😍</button>
-             <button onclick="insertEmoji('❤️')" class="hover:scale-125 transition">❤️</button>
-             <button onclick="insertEmoji('👍')" class="hover:scale-125 transition">👍</button>
-             <button onclick="insertEmoji('💕')" class="hover:scale-125 transition">💕</button>
-             <button onclick="insertEmoji('😘')" class="hover:scale-125 transition">😘</button>
-             <button onclick="insertEmoji('👌')" class="hover:scale-125 transition">👌</button>
-             <button onclick="insertEmoji('😜')" class="hover:scale-125 transition">😜</button>
-             <button onclick="insertEmoji('😁')" class="hover:scale-125 transition">😁</button>
-             <button onclick="insertEmoji('🤞')" class="hover:scale-125 transition">🤞</button>
+         <section class="px-2.5 py-1.5 bg-slate-950/50 flex gap-3 border-t border-slate-800 overflow-x-auto text-sm shrink-0" aria-label="Quick emoji keyboard">
+             <button onclick="insertEmoji('😂')" class="hover:scale-125 transition" aria-label="Insert face with tears of joy emoji">😂</button>
+             <button onclick="insertEmoji('🔥')" class="hover:scale-125 transition" aria-label="Insert fire emoji">🔥</button>
+             <button onclick="insertEmoji('😍')" class="hover:scale-125 transition" aria-label="Insert smiling face with heart eyes emoji">😍</button>
+             <button onclick="insertEmoji('❤️')" class="hover:scale-125 transition" aria-label="Insert red heart emoji">❤️</button>
+             <button onclick="insertEmoji('👍')" class="hover:scale-125 transition" aria-label="Insert thumbs up emoji">👍</button>
+             <button onclick="insertEmoji('💕')" class="hover:scale-125 transition" aria-label="Insert two hearts emoji">💕</button>
+             <button onclick="insertEmoji('😘')" class="hover:scale-125 transition" aria-label="Insert face blowing a kiss emoji">😘</button>
+             <button onclick="insertEmoji('👌')" class="hover:scale-125 transition" aria-label="Insert OK hand emoji">👌</button>
+             <button onclick="insertEmoji('😜')" class="hover:scale-125 transition" aria-label="Insert winking face with tongue emoji">😜</button>
+             <button onclick="insertEmoji('😁')" class="hover:scale-125 transition" aria-label="Insert beaming face with smiling eyes emoji">😁</button>
+             <button onclick="insertEmoji('🤞')" class="hover:scale-125 transition" aria-label="Insert crossed fingers emoji">🤞</button>
          </section>
     
         <footer class="p-2 sm:p-3 bg-slate-900/90 border-t border-slate-800 flex items-center gap-1.5 shrink-0">
-            <button id="action-btn" onclick="toggleSearch()" class="px-3 sm:px-4 py-3 bg-gray-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm transition shadow-md whitespace-nowrap">🔍 Find Partner</button>
+            <button id="action-btn" onclick="toggleSearch()" class="px-3 sm:px-4 py-3 bg-gray-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm transition shadow-md whitespace-nowrap" aria-label="Find or skip partner toggle execution">🔍 Find Partner</button>
             
-            <label for="imageInput" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-3 rounded-xl border border-slate-700 text-xs sm:text-sm flex items-center justify-center transition">📸</label>
+            <label for="imageInput" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-3 rounded-xl border border-slate-700 text-xs sm:text-sm flex items-center justify-center transition" aria-label="Upload and share image files">📸</label>
             <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
 
-            <input id="chat-input" type="text" placeholder="Type text..." oninput="handleTyping()" onkeypress="handleKey(event)" class="flex-1 px-3 py-3 bg-slate-800 border border-slate-700 rounded-xl outline-none text-xs sm:text-sm text-slate-100 focus:border-cyan-500">
-            <button id="voice-btn" onclick="toggleVoiceNote()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-base border border-slate-700">🎙️</button>
-            <button id="send-btn" onclick="sendMsg()" class="px-4 py-3 bg-gray-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md">Send</button>
+            <input id="chat-input" type="text" placeholder="Type text..." oninput="handleTyping()" onkeypress="handleKey(event)" class="flex-1 px-3 py-3 bg-slate-800 border border-slate-700 rounded-xl outline-none text-xs sm:text-sm text-slate-100 focus:border-cyan-500" aria-label="Chat type input field box">
+            <button id="voice-btn" onclick="toggleVoiceNote()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-base border border-slate-700" aria-label="Record voice note audio">🎙️</button>
+            <button id="send-btn" onclick="sendMsg()" class="px-4 py-3 bg-gray-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md" aria-label="Send message transmission execution button">Send</button>
         </footer>
         
     </div>
@@ -408,6 +412,7 @@
             box.className = `max-w-[70%] p-1 bg-slate-900 border rounded-xl shadow-md ${sender === 'me' ? 'bg-indigo-600 border-indigo-500 self-end' : 'bg-slate-800 border-slate-700 self-start'}`;
             let img = document.createElement('img');
             img.src = src;
+            img.alt = "Shared image attachment";
             img.className = "rounded-lg max-h-60 object-contain";
             box.appendChild(img);
             messagesContainer.appendChild(box);
