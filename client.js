@@ -278,6 +278,110 @@ function updateFullscreenMask() {
 }
 
 // ================================================================
+// AUDIO PROCESSING - FIX FOR NOISE/ECHO
+// ================================================================
+let audioContext = null;
+
+function setupAudioProcessing(stream) {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    try {
+        const source = audioContext.createMediaStreamSource(stream);
+        
+        // Gain node - reduce volume to prevent echo
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = 0.6;
+        
+        // Noise gate - removes background noise when not speaking
+        const noiseFilter = audioContext.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.value = 3000;
+        noiseFilter.Q.value = 0.8;
+        
+        // High-pass filter (remove low rumble)
+        const highpass = audioContext.createBiquadFilter();
+        highpass.type = 'highpass';
+        highpass.frequency.value = 100;
+        
+        // Low-pass filter (remove high noise)
+        const lowpass = audioContext.createBiquadFilter();
+        lowpass.type = 'lowpass';
+        lowpass.frequency.value = 8000;
+        
+        // Compressor for consistent volume
+        const compressor = audioContext.createDynamicsCompressor();
+        compressor.threshold.value = -40;
+        compressor.knee.value = 30;
+        compressor.ratio.value = 8;
+        compressor.attack.value = 0.005;
+        compressor.release.value = 0.15;
+        
+        // Connect: source -> filters -> compressor -> output
+        source.connect(highpass);
+        highpass.connect(lowpass);
+        lowpass.connect(noiseFilter);
+        noiseFilter.connect(compressor);
+        compressor.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        return gainNode;
+    } catch (e) {
+        console.log("Audio processing setup failed:", e);
+        return null;
+    }
+}
+
+function processRemoteAudio(stream) {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    try {
+        const source = audioContext.createMediaStreamSource(stream);
+        
+        // Reduce volume of remote audio
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = 0.7;
+        
+        // Noise filter for remote audio
+        const noiseFilter = audioContext.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.value = 3000;
+        noiseFilter.Q.value = 0.8;
+        
+        const highpass = audioContext.createBiquadFilter();
+        highpass.type = 'highpass';
+        highpass.frequency.value = 100;
+        
+        const lowpass = audioContext.createBiquadFilter();
+        lowpass.type = 'lowpass';
+        lowpass.frequency.value = 8000;
+        
+        // Compressor for remote audio
+        const compressor = audioContext.createDynamicsCompressor();
+        compressor.threshold.value = -35;
+        compressor.knee.value = 25;
+        compressor.ratio.value = 6;
+        compressor.attack.value = 0.01;
+        compressor.release.value = 0.2;
+        
+        source.connect(highpass);
+        highpass.connect(lowpass);
+        lowpass.connect(noiseFilter);
+        noiseFilter.connect(compressor);
+        compressor.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        return gainNode;
+    } catch (e) {
+        console.log("Remote audio processing failed:", e);
+        return null;
+    }
+}
+
+// ================================================================
 // PERMISSION HANDLER
 // ================================================================
 async function requestCameraPermission() {
@@ -381,12 +485,36 @@ consentAge.addEventListener('change', () => {
  * ------------------------------------------------------------------ */
 let socket;
 try {
-    socket = io();
+    const host = window.location.host;
+    socket = io(host, {
+        path: '/socket.io/',
+        transports: ['websocket', 'polling'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        timeout: 20000
+    });
+    
+    socket.on('connect', () => {
+        console.log('✅ Connected to server');
+        statusBanner.innerText = '✅ Connected to server';
+    });
+    
+    socket.on('connect_error', (error) => {
+        console.error('❌ Connection error:', error);
+        statusBanner.innerText = '⚠️ Connection error - reloading...';
+        setTimeout(() => window.location.reload(), 3000);
+    });
+    
+    socket.on('disconnect', () => {
+        console.warn('⚠️ Disconnected from server');
+        statusBanner.innerText = '⚠️ Disconnected - reconnecting...';
+    });
 } catch (e) {
     console.error("Socket.IO failed to connect", e);
     socket = { on: () => {}, emit: () => {} };
     const banner = document.getElementById('status-banner');
-    if (banner) banner.innerText = "⚠️ Can't reach chat server — start server.js and reload.";
+    if (banner) banner.innerText = "⚠️ Can't reach chat server — reloading...";
+    setTimeout(() => window.location.reload(), 3000);
 }
 
 /* ------------------------------------------------------------------ *
@@ -2275,28 +2403,30 @@ socket.on('effect-sync', (data) => {
 
 const configuration = {
   iceServers: [
-      { urls: "stun:stun.relay.metered.ca:80" },
-      {
-        urls: "turn:global.relay.metered.ca:80",
-        username: "c82e54e33431753c971307b9",
-        credential: "WNGRoCt9akSdjdCk",
-      },
-      {
-        urls: "turn:global.relay.metered.ca:80?transport=tcp",
-        username: "c82e54e33431753c971307b9",
-        credential: "WNGRoCt9akSdjdCk",
-      },
-      {
-        urls: "turn:global.relay.metered.ca:443",
-        username: "c82e54e33431753c971307b9",
-        credential: "WNGRoCt9akSdjdCk",
-      },
-      {
-        urls: "turns:global.relay.metered.ca:443?transport=tcp",
-        username: "c82e54e33431753c971307b9",
-        credential: "WNGRoCt9akSdjdCk",
-      },
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "stun:stun2.l.google.com:19302" },
+    {
+      urls: "turn:global.relay.metered.ca:80",
+      username: "c82e54e33431753c971307b9",
+      credential: "WNGRoCt9akSdjdCk",
+    },
+    {
+      urls: "turn:global.relay.metered.ca:443",
+      username: "c82e54e33431753c971307b9",
+      credential: "WNGRoCt9akSdjdCk",
+    },
+    {
+      urls: "turns:global.relay.metered.ca:443?transport=tcp",
+      username: "c82e54e33431753c971307b9",
+      credential: "WNGRoCt9akSdjdCk",
+    },
   ],
+  iceCandidatePoolSize: 10,
+  iceTransportPolicy: 'all',
+  bundlePolicy: 'max-bundle',
+  rtcpMuxPolicy: 'require',
+  sdpSemantics: 'unified-plan'
 };
 
 const actionBtn = document.getElementById("action-btn");
@@ -2312,9 +2442,17 @@ const reportBtn = document.getElementById("report-btn");
 async function startMedia() {
     const advancedAudioConstraints = {
         echoCancellation: true,
+        echoCancellationType: 'system',
         noiseSuppression: true,
-        autoGainControl: true
+        noiseSuppressionType: 'high',
+        autoGainControl: true,
+        autoGainControlType: 'adaptive',
+        volume: 0.7,
+        sampleRate: 48000,
+        sampleSize: 16,
+        channelCount: 1
     };
+
     try {
         if (!localStream) {
             const constraints = {
@@ -2326,12 +2464,18 @@ async function startMedia() {
                 },
                 audio: advancedAudioConstraints
             };
+            
             localStream = await getMediaStream(constraints);
+            
+            // Apply audio processing
+            setupAudioProcessing(localStream);
+            
             document.getElementById('local-video').srcObject = localStream;
             applyFilter(activeFilter);
             if (!faceMesh) initFaceTracking();
             localStream.getVideoTracks().forEach(track => track.enabled = true);
         }
+        
         if (peerConnection) {
             localStream.getTracks().forEach(t => {
                 const s = peerConnection.getSenders().find(snd => snd.track && snd.track.kind === t.kind);
@@ -2393,19 +2537,28 @@ function setVideoBitrate(sdp) {
 
 function createPeerConnection(isInitiator) {
     if (peerConnection) peerConnection.close();
+    
     peerConnection = new RTCPeerConnection({
         ...configuration,
         video: {
             width: { ideal: 1280, min: 640 },
             height: { ideal: 720, min: 480 },
             frameRate: { ideal: 30, max: 30 }
+        },
+        audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
         }
     });
+    
     remoteStream = new MediaStream();
     document.getElementById('remote-video').srcObject = remoteStream;
+    
     if (localStream) {
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
     }
+    
     peerConnection.ontrack = (event) => {
         const remoteVideo = document.getElementById('remote-video');
         event.streams[0].getTracks().forEach(track => {
@@ -2413,11 +2566,19 @@ function createPeerConnection(isInitiator) {
                 remoteStream.addTrack(track);
             }
         });
+        
+        // Process remote audio for better quality
+        if (event.streams[0].getAudioTracks().length > 0) {
+            processRemoteAudio(event.streams[0]);
+        }
+        
         remoteVideo.play().catch(e => console.log("Autoplay handled."));
     };
+    
     peerConnection.onicecandidate = (e) => {
         if (e.candidate) socket.emit('signal', { candidate: e.candidate });
     };
+    
     if (isInitiator) {
         peerConnection.onnegotiationneeded = async () => {
             try {
