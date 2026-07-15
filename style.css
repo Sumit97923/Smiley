@@ -1,0 +1,187 @@
+/* 📱 Mobile Dynamic Viewport Fixes & Constants */
+:root {
+    --sat: env(safe-area-inset-top);
+    --sab: env(safe-area-inset-bottom);
+}
+
+html, body {
+    height: 100%;
+    height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: fixed;
+    width: 100vw;
+}
+
+body {
+    background: linear-gradient(135deg, #1a0a1a, #0f172a);
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: var(--sat);
+    padding-bottom: var(--sab);
+}
+
+.chat-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+    background: rgba(236, 72, 153, 0.3);
+    border-radius: 4px;
+}
+
+#main-card {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+@media (min-width: 640px) {
+    #main-card {
+        height: 96dvh;
+        max-height: 820px;
+        max-width: 480px;
+    }
+}
+
+/* 🌟 Video Aspect Ratio & Layout */
+.video-box-frame {
+    height: 180px;
+    position: relative;
+    background-color: #020617;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid #1e293b;
+    min-height: 140px;
+}
+
+@media (min-width: 400px) {
+    .video-box-frame { height: 200px; }
+}
+@media (min-width: 640px) {
+    .video-box-frame { height: 230px; }
+}
+@media (max-height: 640px) and (orientation: landscape) {
+    .video-box-frame { height: 120px; }
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 🎭 AI Camera Blur Filter Class */
+.video-blur {
+    filter: blur(18px) contrast(1.1) brightness(0.85);
+}
+
+/* Persistent "selected" state for filter/mask tray buttons */
+.filter-badge.is-active {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    border-color: #ec4899;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+}
+
+/* Glowing effect for active masks */
+.filter-badge[data-mask].is-active {
+    box-shadow: 0 0 25px rgba(236, 72, 153, 0.4);
+}
+
+/* Mask canvas overlays */
+#mask-canvas, #remote-mask-canvas, #fullscreen-mask-canvas {
+    transition: opacity 0.3s ease;
+}
+
+/* Hidden scrollbars */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Safe area bottom padding */
+.safe-bottom { padding-bottom: calc(8px + var(--sab)); }
+
+/* Prevent iOS auto-zoom on inputs */
+#chat-input { font-size: 16px; }
+@media (min-width: 640px) {
+    #chat-input { font-size: 0.875rem; }
+}
+
+/* 🔒 Consent / privacy gate overlay */
+#consent-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(2, 6, 23, 0.97);
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+}
+#consent-gate .consent-card {
+    max-width: 420px;
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+/* Fullscreen overlay */
+#fullscreen-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#fullscreen-overlay.active {
+    display: flex;
+}
+
+#fullscreen-overlay video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#fullscreen-mask-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+}
+
+/* Messages container - smaller */
+#messages-container {
+    max-height: 120px;
+    min-height: 60px;
+}
+
+/* Mobile footer fixes */
+footer .flex-1 {
+    min-width: 0;
+    flex: 1 1 0%;
+}
+
+footer button, footer label {
+    flex-shrink: 0;
+}
+
+/* Mute button styling */
+#mute-btn.muted {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+}
