@@ -4,67 +4,24 @@
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="google-site-verification" content="eXiIFlxKzFtJCZcu9pGaqgZqZcnjdzaQQV1JP9Ss8WA" />
-    
+
     <title>Smiley Chat - Random Video Chat with Strangers</title>
     <meta name="description" content="Smiley Chat is the ultimate random video chat platform to meet strangers instantly with HD quality and secure connection.">
     <meta name="keywords" content="Smiley Chat, smiley chat, random video chat, talk to strangers, smiley video call">
     <meta name="author" content="Smiley Chat Studio">
     <meta property="og:site_name" content="Smiley Chat">
     <meta name="apple-mobile-web-app-title" content="Smiley Chat">
-    
-    <!-- 🗺️ SEO Crawler Paths (Discovered by Search Engines) -->
+
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
     <link rel="author" type="text/plain" href="/robots.txt" />
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <style>
-        /* 📱 Mobile Dynamic Viewport Fixes */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        body { 
-            background: linear-gradient(135deg, #1e1e24, #0f172a); 
-            height: 100vh;
-            height: -webkit-fill-available;
-        }
-        .chat-scroll::-webkit-scrollbar { width: 6px; }
-        .chat-scroll::-webkit-scrollbar-thumb { background: rgba(96, 100, 108, 0.2); border-radius: 4px; }
-        
-        #main-card {
-            height: 100%;
-        }
-        @media (min-width: 640px) {
-            #main-card {
-                height: 96vh;
-            }
-        }
 
-        /* 🌟 Video Aspect Ratio & Layout Enhancements for Mobile Fix */
-        .video-box-frame {
-            height: 140px; /* Exact uniform dynamic height to prevent layout shifts */
-            position: relative;
-            background-color: #020617;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            border: 1px solid #1e293b;
-        }
-        @media (min-width: 640px) {
-            .video-box-frame {
-                height: 180px;
-            }
-        }
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* 🌟 Eliminates black/red distortion bars instantly */
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="/socket.io/socket.io.js"></script>
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -73,551 +30,176 @@
       "url": "https://smiley-x3xp.onrender.com/"
     }
     </script>
-</head>
-<body class="w-screen flex items-center justify-center sm:p-2 text-slate-100 font-sans antialiased select-none">
 
-    <div id="main-card" role="main" class="w-full max-w-xl bg-slate-900/95 backdrop-blur-lg sm:rounded-2xl shadow-2xl flex flex-col max-h-none sm:max-h-[820px] overflow-hidden border-0 sm:border border-slate-800">
-        
-        <header class="bg-slate-800/60 p-3 sm:p-4 flex justify-between items-center border-b border-slate-800 shrink-0">
+</head>
+<body class="w-screen flex items-center justify-center text-slate-100 font-sans antialiased select-none overflow-hidden">
+
+    <!-- 🔒 One-time consent / privacy gate -->
+    <div id="consent-gate" style="display:flex;">
+        <div class="consent-card">
+            <h2 class="text-lg font-bold text-cyan-400 mb-2">🌸 Welcome to Smiley Chat</h2>
+            <p class="text-xs text-slate-300 mb-3">You must be 18+ to use Smiley Chat. Be respectful — no nudity, harassment, or sharing of personal contact info.</p>
+            <label class="flex items-start gap-2 text-xs text-slate-300 mb-2 cursor-pointer">
+                <input type="checkbox" id="consent-age" class="mt-0.5">
+                I confirm I am 18 years of age or older.
+            </label>
+            <label class="flex items-start gap-2 text-xs text-slate-300 mb-4 cursor-pointer">
+                <input type="checkbox" id="consent-blur-default" class="mt-0.5">
+                Start with AI blur ON for privacy (recommended).
+            </label>
+            <p id="consent-warning" class="hidden text-[11px] text-red-400 mb-2">Please tick the 18+ box above to continue.</p>
+            <button id="consent-continue" class="w-full py-2.5 bg-pink-500 hover:bg-pink-400 text-white font-bold rounded-xl text-sm transition">🌸 Agree & Continue</button>
+        </div>
+    </div>
+
+    <div id="main-card" role="main" class="w-full max-w-xl bg-slate-900/95 backdrop-blur-lg flex flex-col h-full sm:h-[92vh] sm:rounded-2xl shadow-2xl overflow-hidden border-0 sm:border border-slate-800">
+
+        <header class="bg-gradient-to-r from-pink-900/60 to-purple-900/60 p-3 sm:p-4 flex justify-between items-center border-b border-slate-800 shrink-0">
             <div>
-                <h1 class="font-black text-lg sm:text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-red-400 to-purple-400">Smiley Chat</h1>
+                <h1 class="font-black text-lg sm:text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400">🌸 Smiley Chat</h1>
                 <p class="text-[10px] sm:text-xs text-slate-400 flex gap-2 items-center mt-0.5">
-                    <span class="inline-block w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <span class="text-emerald-400 font-mono">Status: Engines Synchronized</span> 
+                    <span class="inline-block w-2 h-2 bg-pink-400 rounded-full animate-pulse"></span>
+                    <span class="text-pink-400 font-mono">✨ Safe & Fun Community</span>
                 </p>
             </div>
             <div class="flex items-center gap-1.5">
                 <button id="report-btn" onclick="reportStranger()" class="hidden bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-1 px-2 rounded transition" aria-label="Report current stranger">🚩 Report</button>
-                
-                <div class="relative flex items-center bg-slate-800 rounded-lg border border-slate-700 pl-2 pr-0.5 py-0.5">
-                    <svg class="w-4 h-4 text-cyan-400 animate-pulse mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 002-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                    <select id="call-mode" class="bg-transparent text-[11px] sm:text-xs text-white outline-none pr-1 cursor-pointer font-medium" aria-label="Select calling mode">
-                        <option value="video" class="bg-slate-900">Video + Audio</option>
-                        <option value="audio" class="bg-slate-900">Audio Only</option>
-                    </select>
-                </div>
+                <button id="mute-btn" onclick="toggleMute()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded text-[10px] font-bold border border-slate-700 transition" aria-label="Toggle mute">🔊</button>
             </div>
         </header>
-        
-        <section id="status-banner" role="status" class="bg-slate-950/80 text-cyan-400 text-center py-1.5 text-[11px] font-mono border-b border-slate-800 shrink-0">
-             Press Find Partner to start ⚡
+
+        <section id="status-banner" role="status" class="bg-slate-950/80 text-pink-400 text-center py-1.5 text-[11px] font-mono border-b border-slate-800 shrink-0">
+             💕 Press Find Partner to start your journey
         </section>
 
-        <section id="video-grid" class="grid grid-cols-2 gap-2 p-2 bg-black/40 border-b border-slate-800 shrink-0">
-            <div class="video-box-frame">
-                <video id="local-video" autoplay playsinline muted style="transform: scaleX(-1);" aria-label="Your local camera feed"></video>
+        <!-- Video Grid -->
+        <section id="video-grid" class="grid grid-cols-2 gap-2 p-2 bg-black/40 border-b border-slate-800 shrink-0 relative">
+            <div id="local-video-container" class="video-box-frame relative overflow-hidden rounded-xl bg-slate-950 cursor-pointer" onclick="toggleFullscreen('local')">
+                <video id="local-video" autoplay playsinline muted style="transform: scaleX(-1);" aria-label="Your local camera feed" class="w-full h-full object-cover transition-all duration-300"></video>
                 <div id="audio-only-local" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 text-xs">🎤 Mic Active</div>
-                <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-slate-300 text-[10px] px-2 py-0.5 rounded-md">You</span>
+                <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-pink-300 text-[10px] px-2 py-0.5 rounded-md z-10">💖 You</span>
+                <span class="absolute top-1.5 right-1.5 bg-black/60 text-white text-[8px] px-1.5 py-0.5 rounded-md z-10 opacity-50">⛶</span>
+                <canvas id="mask-canvas" style="transform: scaleX(-1);" class="absolute inset-0 w-full h-full pointer-events-none z-20"></canvas>
             </div>
-            <div class="video-box-frame">
-                <video id="remote-video" autoplay playsinline aria-label="Stranger remote camera feed"></video>
+
+            <div id="remote-video-container" class="video-box-frame relative overflow-hidden rounded-xl bg-slate-950 cursor-pointer" onclick="toggleFullscreen('remote')">
+                <video id="remote-video" autoplay playsinline aria-label="Stranger remote camera feed" class="w-full h-full object-cover transition-all duration-300"></video>
                 <div id="audio-only-remote" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 text-xs">🔊 Stranger Connected</div>
-                <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-slate-300 text-[10px] px-2 py-0.5 rounded-md">Stranger</span>
+                <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-pink-300 text-[10px] px-2 py-0.5 rounded-md z-10">💕 Stranger</span>
+                <span class="absolute top-1.5 right-1.5 bg-black/60 text-white text-[8px] px-1.5 py-0.5 rounded-md z-10 opacity-50">⛶</span>
+                <canvas id="remote-mask-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-20"></canvas>
             </div>
         </section>
 
-        <section id="messages-container" aria-live="polite" aria-label="Chat messages history" class="flex-1 p-3 overflow-y-auto chat-scroll flex flex-col gap-2.5 bg-slate-950/10"></section>
+        <!-- Fullscreen overlay -->
+        <div id="fullscreen-overlay" class="hidden fixed inset-0 z-50 bg-black flex items-center justify-center" onclick="closeFullscreen()">
+            <video id="fullscreen-video" autoplay playsinline muted class="w-full h-full object-contain"></video>
+            <canvas id="fullscreen-mask-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-20"></canvas>
+            <button class="absolute top-4 right-4 text-white text-3xl bg-black/50 rounded-full w-12 h-12 flex items-center justify-center hover:bg-black/70 transition" onclick="closeFullscreen()">✕</button>
+            <span class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-xs bg-black/50 px-3 py-1 rounded-full">💕 Tap to close</span>
+        </div>
 
-         <div id="reply-preview-box" class="hidden px-4 py-2 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-300 flex justify-between items-center shrink-0">
+        <!-- Filter Section -->
+        <section class="px-3 py-1.5 bg-slate-950/90 border-b border-slate-800 flex gap-2 overflow-x-auto text-[10px] shrink-0 scrollbar-none" aria-label="Camera effects">
+            <button data-filter="none" onclick="applyFilter('none')" class="filter-badge is-active bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">Normal</button>
+            <button data-filter="blur" onclick="applyFilter('blur')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">✨ AI Blur</button>
+            
+            <!-- Cute Face Shape Masks -->
+            <button data-mask="heart" onclick="applyMask('heart')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">❤️ Heart</button>
+            <button data-mask="diamond" onclick="applyMask('diamond')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">💎 Diamond</button>
+            <button data-mask="round" onclick="applyMask('round')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">⚪ Round</button>
+            <button data-mask="oval" onclick="applyMask('oval')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🥚 Oval</button>
+            
+            <!-- Cute Character Masks -->
+            <button data-mask="princess" onclick="applyMask('princess')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">👸 Princess</button>
+            <button data-mask="unicorn" onclick="applyMask('unicorn')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🦄 Unicorn</button>
+            <button data-mask="bunny_cute" onclick="applyMask('bunny_cute')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🐰 Bunny</button>
+            <button data-mask="cat_cute" onclick="applyMask('cat_cute')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🐱 Cute Cat</button>
+            <button data-mask="fox" onclick="applyMask('fox')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🦊 Fox</button>
+            <button data-mask="panda" onclick="applyMask('panda')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🐼 Panda</button>
+            <button data-mask="koala" onclick="applyMask('koala')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🐨 Koala</button>
+            
+            <!-- Fantasy Masks (New) -->
+            <button data-mask="mermaid" onclick="applyMask('mermaid')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🧜‍♀️ Mermaid</button>
+            <button data-mask="fairy" onclick="applyMask('fairy')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🧚 Fairy</button>
+            <button data-mask="angel" onclick="applyMask('angel')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">👼 Angel</button>
+            <button data-mask="butterfly" onclick="applyMask('butterfly')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🦋 Butterfly</button>
+            <button data-mask="starry" onclick="applyMask('starry')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">✨ Starry</button>
+            
+            <!-- Existing Masks -->
+            <button data-mask="spiderman" onclick="applyMask('spiderman')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🕷️ Spiderman</button>
+            <button data-mask="venom" onclick="applyMask('venom')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🎭 Venom</button>
+            <button data-mask="ironman" onclick="applyMask('ironman')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🤖 Iron Man</button>
+            <button data-mask="ghost" onclick="applyMask('ghost')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">👻 Ghost</button>
+            <button data-mask="cat_full" onclick="applyMask('cat_full')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🐱 Cat</button>
+            <button data-mask="werewolf" onclick="applyMask('werewolf')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🐺 Werewolf</button>
+            
+            <button data-mask="none" onclick="applyMask('none')" class="filter-badge bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-white whitespace-nowrap">🚫 Clear Mask</button>
+        </section>
+
+        <!-- Messages Container -->
+        <section id="messages-container" aria-live="polite" aria-label="Chat messages history" class="flex-1 p-2 overflow-y-auto chat-scroll flex flex-col gap-2 bg-slate-950/10 max-h-[120px]"></section>
+
+         <div id="reply-preview-box" class="hidden px-4 py-1.5 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-300 flex justify-between items-center shrink-0">
             <div>
-                <span class="font-bold text-cyan-400">Replying to: </span>
+                <span class="font-bold text-pink-400">💕 Replying to: </span>
                 <span id="reply-preview-text" class="italic">Message context...</span>
             </div>
             <button onclick="cancelReply()" class="text-red-400 font-bold hover:text-red-300" aria-label="Cancel reply option">✕</button>
          </div>
 
-         <div id="typing-indicator" aria-live="assertive" class="hidden px-4 py-1.5 text-xs text-cyan-400 font-medium italic bg-slate-950/40 flex items-center gap-1.5 border-t border-slate-800/40 shrink-0">
-            <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></span>
-            <span>Stranger is typing...</span>
+         <div id="typing-indicator" aria-live="assertive" class="hidden px-4 py-1 text-xs text-pink-400 font-medium italic bg-slate-950/40 flex items-center gap-1.5 border-t border-slate-800/40 shrink-0">
+            <span class="w-1.5 h-1.5 bg-pink-400 rounded-full animate-bounce"></span>
+            <span>💕 Stranger is typing...</span>
          </div>
-        
-         <section class="px-2.5 py-1.5 bg-slate-950/50 flex gap-3 border-t border-slate-800 overflow-x-auto text-sm shrink-0" aria-label="Quick emoji keyboard">
-             <button onclick="insertEmoji('😂')" class="hover:scale-125 transition" aria-label="Insert face with tears of joy emoji">😂</button>
-             <button onclick="insertEmoji('🔥')" class="hover:scale-125 transition" aria-label="Insert fire emoji">🔥</button>
-             <button onclick="insertEmoji('😍')" class="hover:scale-125 transition" aria-label="Insert smiling face with heart eyes emoji">😍</button>
-             <button onclick="insertEmoji('❤️')" class="hover:scale-125 transition" aria-label="Insert red heart emoji">❤️</button>
-             <button onclick="insertEmoji('👍')" class="hover:scale-125 transition" aria-label="Insert thumbs up emoji">👍</button>
-             <button onclick="insertEmoji('💕')" class="hover:scale-125 transition" aria-label="Insert two hearts emoji">💕</button>
-             <button onclick="insertEmoji('😘')" class="hover:scale-125 transition" aria-label="Insert face blowing a kiss emoji">😘</button>
-             <button onclick="insertEmoji('👌')" class="hover:scale-125 transition" aria-label="Insert OK hand emoji">👌</button>
-             <button onclick="insertEmoji('😜')" class="hover:scale-125 transition" aria-label="Insert winking face with tongue emoji">😜</button>
-             <button onclick="insertEmoji('😁')" class="hover:scale-125 transition" aria-label="Insert beaming face with smiling eyes emoji">😁</button>
-             <button onclick="insertEmoji('🤞')" class="hover:scale-125 transition" aria-label="Insert crossed fingers emoji">🤞</button>
+
+         <!-- Quick Emoji Keyboard -->
+         <section class="px-2.5 py-1 bg-slate-950/50 flex gap-3 border-t border-slate-800 overflow-x-auto text-sm shrink-0" aria-label="Quick emoji keyboard">
+             <button onclick="insertEmoji('😂')" class="hover:scale-125 transition" aria-label="Insert emoji">😂</button>
+             <button onclick="insertEmoji('🔥')" class="hover:scale-125 transition" aria-label="Insert emoji">🔥</button>
+             <button onclick="insertEmoji('😍')" class="hover:scale-125 transition" aria-label="Insert emoji">😍</button>
+             <button onclick="insertEmoji('❤️')" class="hover:scale-125 transition" aria-label="Insert emoji">❤️</button>
+             <button onclick="insertEmoji('💕')" class="hover:scale-125 transition" aria-label="Insert emoji">💕</button>
+             <button onclick="insertEmoji('🌸')" class="hover:scale-125 transition" aria-label="Insert emoji">🌸</button>
+             <button onclick="insertEmoji('✨')" class="hover:scale-125 transition" aria-label="Insert emoji">✨</button>
+             <button onclick="insertEmoji('👸')" class="hover:scale-125 transition" aria-label="Insert emoji">👸</button>
+             <button onclick="insertEmoji('🦄')" class="hover:scale-125 transition" aria-label="Insert emoji">🦄</button>
+             <button onclick="insertEmoji('😘')" class="hover:scale-125 transition" aria-label="Insert emoji">😘</button>
+             <button onclick="insertEmoji('💖')" class="hover:scale-125 transition" aria-label="Insert emoji">💖</button>
          </section>
-    
-        <footer class="p-2 sm:p-3 bg-slate-900/90 border-t border-slate-800 flex items-center gap-1.5 shrink-0">
-            <button id="action-btn" onclick="toggleSearch()" class="px-3 sm:px-4 py-3 bg-gray-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm transition shadow-md whitespace-nowrap" aria-label="Find or skip partner toggle execution">🔍 Find Partner</button>
-            
+
+         <!-- Icebreaker & Fantasy Features -->
+         <section class="px-2 py-1 bg-pink-950/20 border-t border-pink-900/30 flex gap-2 overflow-x-auto text-[10px] shrink-0 scrollbar-none">
+             <span class="text-pink-300 font-bold whitespace-nowrap">💬 Icebreakers:</span>
+             <button onclick="sendIcebreaker('What\'s your favorite movie? 🎬')" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">🎬 Movies</button>
+             <button onclick="sendIcebreaker('What music do you like? 🎵')" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">🎵 Music</button>
+             <button onclick="sendIcebreaker('Where would you travel? ✈️')" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">✈️ Travel</button>
+             <button onclick="sendIcebreaker('Your favorite food? 🍕')" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">🍕 Food</button>
+             <button onclick="sendIcebreaker('What makes you happy? 😊')" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">😊 Happiness</button>
+             <button onclick="sendIcebreaker('Your dream job? 💼')" class="bg-pink-900/50 hover:bg-pink-800/50 text-pink-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">💼 Dream</button>
+             <button onclick="sendCompliment()" class="bg-pink-600/30 hover:bg-pink-600/50 text-pink-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">🌸 Compliment</button>
+             <button onclick="sendFunQuestion()" class="bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">✨ Fun Q</button>
+             <button onclick="sendCuteCompliment()" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">💕 Cute</button>
+             <button onclick="sendFantasyPickup()" class="bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">🌟 Pickup</button>
+             <button onclick="sendMagicQuestion()" class="bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 px-2 py-0.5 rounded-full whitespace-nowrap transition">🔮 Magic</button>
+         </section>
+
+        <footer class="p-2 sm:p-3 bg-slate-900/90 border-t border-slate-800 flex items-center gap-1.5 shrink-0 safe-bottom">
+            <button id="action-btn" onclick="toggleSearch()" class="px-3 sm:px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold rounded-xl text-xs sm:text-sm transition shadow-md whitespace-nowrap">💕 Find Partner</button>
+
             <label for="imageInput" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-3 rounded-xl border border-slate-700 text-xs sm:text-sm flex items-center justify-center transition" aria-label="Upload and share image files">📸</label>
             <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
 
-            <input id="chat-input" type="text" placeholder="Type text..." oninput="handleTyping()" onkeypress="handleKey(event)" class="flex-1 px-3 py-3 bg-slate-800 border border-slate-700 rounded-xl outline-none text-xs sm:text-sm text-slate-100 focus:border-cyan-500" aria-label="Chat type input field box">
-            <button id="voice-btn" onclick="toggleVoiceNote()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-base border border-slate-700" aria-label="Record voice note audio">🎙️</button>
-            <button id="send-btn" onclick="sendMsg()" class="px-4 py-3 bg-gray-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md" aria-label="Send message transmission execution button">Send</button>
+            <input id="chat-input" type="text" placeholder="Type a message... 💕" oninput="handleTyping()" onkeypress="handleKey(event)" class="flex-1 min-w-0 px-3 py-3 bg-slate-800 border border-slate-700 rounded-xl outline-none text-xs sm:text-sm text-slate-100 focus:border-pink-500 placeholder:text-slate-500" aria-label="Chat type input field box">
+            <button id="voice-btn" onclick="toggleVoiceNote()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-base border border-slate-700 flex-shrink-0" aria-label="Record voice note audio">🎙️</button>
+            <button id="send-btn" onclick="sendMsg()" class="px-4 py-3 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md flex-shrink-0" aria-label="Send message">💕 Send</button>
         </footer>
-        
+
     </div>
 
-    <script>
-        const socket = io();
-        let localStream, peerConnection, isConnected = false, isSearching = false;
-        let mediaRecorder, audioChunks = [], isRecordingVoice = false;
-        let typingTimeout;
-        let remoteStream = null;
+    <!-- Face tracking for masks -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
-        let selectedReplyMsgId = null;
-        let selectedEditMsgId = null;
-
-        const badWords = ["abuse1", "abuse2", "gali1", "gali2", "chutiya", "bhenchod", "gand"];
-
-        function containsLink(text) {
-            const urlPattern = /(https?:\/\/[^\s]+)|([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/ig;
-            return urlPattern.test(text);
-        }
-
-        function filterBadWords(text) {
-            let cleanText = text;
-            badWords.forEach(word => {
-                const regex = new RegExp(`\\b${word}\\b`, 'gi');
-                cleanText = cleanText.replace(regex, "****");
-            });
-            return cleanText;
-        }
-
-        const configuration = {
-          iceServers: [
-              { urls: "stun:stun.relay.metered.ca:80" },
-              {
-                urls: "turn:global.relay.metered.ca:80",
-                username: "c82e54e33431753c971307b9",
-                credential: "WNGRoCt9akSdjdCk",
-              },
-              {
-                urls: "turn:global.relay.metered.ca:80?transport=tcp",
-                username: "c82e54e33431753c971307b9",
-                credential: "WNGRoCt9akSdjdCk",
-              },
-              {
-                urls: "turn:global.relay.metered.ca:443",
-                username: "c82e54e33431753c971307b9",
-                credential: "WNGRoCt9akSdjdCk",
-              },
-              {
-                urls: "turns:global.relay.metered.ca:443?transport=tcp",
-                username: "c82e54e33431753c971307b9",
-                credential: "WNGRoCt9akSdjdCk",
-              },
-          ],
-        };
-
-        const actionBtn = document.getElementById("action-btn");
-        const statusBanner = document.getElementById("status-banner");
-        const messagesContainer = document.getElementById("messages-container");
-        const typingIndicator = document.getElementById("typing-indicator");
-        const chatInput = document.getElementById("chat-input");
-        const sendBtn = document.getElementById("send-btn");
-        const replyPreviewBox = document.getElementById("reply-preview-box");
-        const replyPreviewText = document.getElementById("reply-preview-text");
-        const reportBtn = document.getElementById("report-btn");
-
-        async function startMedia() {
-            const useVideo = (document.getElementById("call-mode").value === "video");
-            document.getElementById("audio-only-local").style.display = useVideo ? "none" : "flex";
-            document.getElementById("audio-only-remote").style.display = useVideo ? "none" : "flex";
-            
-            // 🌟 Fully Synchronized Hardware Audio Constraints Matrix
-            const advancedAudioConstraints = {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-            };
-            
-            try {
-                if(!localStream) {
-                    localStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: useVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30, max: 30 }, facingMode: "user" } : false, 
-                        audio: advancedAudioConstraints
-                    });
-                    document.getElementById('local-video').srcObject = localStream;
-                } else {
-                    localStream.getVideoTracks().forEach(track => track.enabled = useVideo);
-                }
-                
-                if (peerConnection) {
-                    localStream.getTracks().forEach(t => {
-                        const s = peerConnection.getSenders().find(snd => snd.track && snd.track.kind === t.kind);
-                        if (s) s.replaceTrack(t);
-                    });
-                }
-            } catch (err) { 
-                console.warn("Retrying media pipelines with safe bounds...", err);
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ video: useVideo, audio: advancedAudioConstraints });
-                    document.getElementById('local-video').srcObject = localStream;
-                } catch(e) {
-                    alert("Please turn on Camera and Mic permissions manually!");
-                }
-            }
-        }
-        
-        document.getElementById("call-mode").addEventListener("change", async () => {
-            if(localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-            await startMedia();
-        });
-        window.addEventListener('DOMContentLoaded', startMedia);
-
-        function toggleSearch() {
-            if (!isSearching && !isConnected) {
-                isSearching = true;
-                actionBtn.innerText = "🛑 Stop";
-                actionBtn.className = "px-3 sm:px-4 py-3 bg-red-600 text-white font-bold rounded-xl text-xs sm:text-sm";
-                statusBanner.innerText = "Scanning active channels...";
-                socket.emit('find-partner', { mode: document.getElementById("call-mode").value });
-                reportBtn.classList.add("hidden");
-            } else { resetConnection(); socket.emit('skip'); }
-        }
-
-        socket.on('matched', (data) => {
-            isConnected = true; isSearching = false;
-            actionBtn.innerText = "❌ Skip";
-            actionBtn.className = "px-3 sm:px-4 py-3 bg-amber-600 text-white font-bold rounded-xl text-xs sm:text-sm";
-            statusBanner.innerText = "🎯 Partner linked! Communications active.";
-            messagesContainer.innerHTML = `<div class="text-xs text-center text-slate-600">Secure link established.</div>`;
-            reportBtn.classList.remove("hidden");
-            createPeerConnection(data.isInitiator);
-        });
-
-        function setVideoBitrate(sdp) {
-            return sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:1500\r\n');
-        }
-
-        function createPeerConnection(isInitiator) {
-            if (peerConnection) peerConnection.close();
-            peerConnection = new RTCPeerConnection(configuration);
-            
-            remoteStream = new MediaStream();
-            document.getElementById('remote-video').srcObject = remoteStream;
-
-            if (localStream) {
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-            }
-            
-            peerConnection.ontrack = (event) => {
-                const remoteVideo = document.getElementById('remote-video');
-                event.streams[0].getTracks().forEach(track => {
-                    if (!remoteStream.getTracks().find(t => t.id === track.id)) {
-                        remoteStream.addTrack(track);
-                    }
-                });
-                remoteVideo.play().catch(e => console.log("Autoplay handled."));
-            };
-
-            peerConnection.onicecandidate = (e) => { 
-                if (e.candidate) socket.emit('signal', { candidate: e.candidate }); 
-            };
-
-            if (isInitiator) {
-                peerConnection.onnegotiationneeded = async () => {
-                    try {
-                        let offer = await peerConnection.createOffer();
-                        offer.sdp = setVideoBitrate(offer.sdp);
-                        await peerConnection.setLocalDescription(offer);
-                        socket.emit('signal', { offer: offer });
-                    } catch(err) { console.error(err); }
-                };
-            }
-        }
-
-        socket.on('signal', async (d) => {
-            if (!peerConnection) return;
-            try {
-                if (d.offer) {
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(d.offer));
-                    let a = await peerConnection.createAnswer();
-                    a.sdp = setVideoBitrate(a.sdp);
-                    await peerConnection.setLocalDescription(a);
-                    socket.emit('signal', { answer: a });
-                } else if (d.answer) { 
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(d.answer)); 
-                } else if (d.candidate) { 
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(d.candidate)); 
-                }
-            } catch (err) { console.log("Signal tracking error:", err); }
-        });
-
-        function sendMsg() {
-            if (chatInput.value.trim() && isConnected) {
-                let val = chatInput.value.trim();
-                
-                if (containsLink(val)) {
-                    alert("Links share karna allowed nahi hai!");
-                    return;
-                }
-
-                val = filterBadWords(val);
-
-                if (selectedEditMsgId) {
-                    socket.emit('edit-message', { msgId: selectedEditMsgId, newText: val });
-                    updateLocalMsgUI(selectedEditMsgId, val);
-                    cancelEdit();
-                } else {
-                    const uniqueMsgId = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-                    const messagePayload = {
-                        msgId: uniqueMsgId,
-                        text: val,
-                        replyToId: selectedReplyMsgId,
-                        replyToText: selectedReplyMsgId ? document.getElementById(`text-${selectedReplyMsgId}`).innerText : null
-                    };
-                    
-                    appendMsg(messagePayload, 'me');
-                    socket.emit('text-message', messagePayload);
-                    cancelReply();
-                }
-                
-                chatInput.value = '';
-                socket.emit('typing-state', false);
-            }
-        }
-
-        function handleImageUpload(e) {
-            if (!isConnected) return;
-            const file = e.target.files[0];
-            if (file) {
-                if (file.size > 1024 * 1024) {
-                    alert("Kripya 1MB se choti size ki photo share karein.");
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const base64Image = event.target.result;
-                    socket.emit('send-image', base64Image);
-                    appendImageElement(base64Image, 'me');
-                };
-                reader.readAsDataURL(file);
-                e.target.value = '';
-            }
-        }
-
-        socket.on('receive-image', (base64Image) => {
-            appendImageElement(base64Image, 'stranger');
-        });
-
-        function appendImageElement(src, sender) {
-            let box = document.createElement('div');
-            box.className = `max-w-[70%] p-1 bg-slate-900 border rounded-xl shadow-md ${sender === 'me' ? 'bg-indigo-600 border-indigo-500 self-end' : 'bg-slate-800 border-slate-700 self-start'}`;
-            let img = document.createElement('img');
-            img.src = src;
-            img.alt = "Shared image attachment";
-            img.className = "rounded-lg max-h-60 object-contain";
-            box.appendChild(img);
-            messagesContainer.appendChild(box);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function reportStranger() {
-            if(confirm("Kya aap is stranger ko report karke permanent block karna chahte hain?")) {
-                socket.emit('report-stranger');
-                resetConnection();
-                let d = document.createElement('div');
-                d.className = "self-center bg-red-950/40 text-xs px-3 py-1 rounded text-red-400 italic";
-                d.innerText = "Aapne stranger ko block kar diya hai.";
-                messagesContainer.appendChild(d);
-            }
-        }
-
-        socket.on('text-message', (messagePayload) => {
-            appendMsg(messagePayload, 'stranger');
-        });
-
-        socket.on('edit-message', (data) => {
-            updateLocalMsgUI(data.msgId, data.newText);
-        });
-
-        socket.on('delete-message', (data) => {
-            const textElement = document.getElementById(`text-${data.msgId}`);
-            if (textElement) {
-                textElement.innerText = "🗑️ This message was deleted";
-                textElement.classList.add("italic", "text-slate-500");
-                const actionsBlock = document.getElementById(`actions-${data.msgId}`);
-                if (actionsBlock) actionsBlock.remove();
-            }
-        });
-
-        function initiateReply(msgId, originalText) {
-            selectedReplyMsgId = msgId;
-            selectedEditMsgId = null;
-            sendBtn.innerText = "Send";
-            replyPreviewText.innerText = originalText.length > 35 ? originalText.substring(0,35) + "..." : originalText;
-            replyPreviewBox.classList.remove("hidden");
-            chatInput.focus();
-        }
-
-        function cancelReply() {
-            selectedReplyMsgId = null;
-            replyPreviewBox.classList.add("hidden");
-        }
-
-        function initiateEdit(msgId, currentText) {
-            selectedEditMsgId = msgId;
-            selectedReplyMsgId = null;
-            replyPreviewBox.classList.add("hidden");
-            chatInput.value = currentText;
-            sendBtn.innerText = "✍️ Edit";
-            chatInput.focus();
-        }
-
-        function cancelEdit() {
-            selectedEditMsgId = null;
-            sendBtn.innerText = "Send";
-            chatInput.value = '';
-        }
-
-        function requestDelete(msgId) {
-            if(confirm("Delete this message?")) {
-                socket.emit('delete-message', { msgId: msgId });
-                const textElement = document.getElementById(`text-${msgId}`);
-                if (textElement) {
-                    textElement.innerText = "🗑️ You deleted this message";
-                    textElement.classList.add("italic", "text-slate-400");
-                    const actionsBlock = document.getElementById(`actions-${msgId}`);
-                    if (actionsBlock) actionsBlock.remove();
-                }
-            }
-        }
-
-        function updateLocalMsgUI(msgId, newText) {
-            const textElement = document.getElementById(`text-${msgId}`);
-            if (textElement) {
-                textElement.innerText = newText + " (edited)";
-            }
-        }
-
-        function handleTyping() {
-            if (!isConnected) return;
-            socket.emit('typing-state', true);
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                socket.emit('typing-state', false);
-            }, 1800);
-        }
-
-        socket.on('typing-state', (isTyping) => {
-            if (isTyping) { typingIndicator.classList.remove("hidden"); }
-            else { typingIndicator.classList.add("hidden"); }
-        });
-
-        function insertEmoji(emoji) {
-            chatInput.value += emoji;
-            chatInput.focus();
-            handleTyping();
-        }
-
-        async function toggleVoiceNote() {
-            if (!isConnected) return;
-            const voiceBtn = document.getElementById("voice-btn");
-            if (!isRecordingVoice) {
-                try {
-                    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(audioStream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const r = new FileReader(); r.readAsDataURL(audioBlob);
-                        r.onloadend = () => {
-                            socket.emit('voice-note', r.result);
-                            appendVoiceElement(r.result, 'me');
-                        }
-                    };
-                    mediaRecorder.start(); isRecordingVoice = true;
-                    voiceBtn.innerText = "🛑"; voiceBtn.className = "px-2.5 py-2.5 bg-red-600 text-white rounded-xl text-base animate-pulse";
-                } catch (err) { alert("Mic connection needed!"); }
-            } else {
-                mediaRecorder.stop(); isRecordingVoice = false;
-                voiceBtn.innerText = "🎙️"; voiceBtn.className = "px-2.5 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-base border border-slate-700";
-            }
-        }
-
-        socket.on('voice-note', (base64Audio) => appendVoiceElement(base64Audio, 'stranger'));
-
-        function appendVoiceElement(data, sender) {
-            let box = document.createElement('div');
-            box.className = `max-w-[75%] p-3 rounded-xl flex flex-col gap-1.5 ${sender==='me'?'bg-indigo-600 self-end':'bg-slate-800 self-start'}`;
-            let audio = document.createElement('audio'); audio.src = data; audio.controls = true;
-            audio.className = "w-48 h-8 filter invert contrast-125 rounded-md";
-            box.appendChild(audio); messagesContainer.appendChild(box);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        socket.on('partner-disconnected', () => {
-            let d = document.createElement('div');
-            d.className = "self-center bg-red-950/40 text-xs px-3 py-1 rounded text-red-400 italic";
-            d.innerText = "Stranger left the room.";
-            messagesContainer.appendChild(d);
-            resetConnection();
-        });
-
-        function resetConnection() {
-            if (peerConnection) peerConnection.close();
-            document.getElementById('remote-video').srcObject = null;
-            remoteStream = null;
-            isConnected = false; isSearching = false;
-            typingIndicator.classList.add("hidden");
-            reportBtn.classList.add("hidden");
-            cancelReply();
-            cancelEdit();
-            actionBtn.innerText = "🔍 Find Partner";
-            actionBtn.className = "px-3 sm:px-4 py-3 bg-indigo-600 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md";
-            statusBanner.innerText = "Connection reset.";
-        }
-
-        function appendMsg(payload, sender) {
-            const msgId = payload.msgId;
-            const msgText = payload.text;
-
-            let mainWrapper = document.createElement('div');
-            mainWrapper.id = `bubble-${msgId}`;
-            mainWrapper.className = `max-w-[75%] flex flex-col gap-1 group ${sender === 'me' ? 'self-end items-end' : 'self-start items-start'}`;
-
-            if (payload.replyToId && payload.replyToText) {
-                let quoteBox = document.createElement('div');
-                quoteBox.className = "text-[11px] opacity-70 bg-black/30 px-2 py-1 rounded-lg border-l-2 border-cyan-400 max-w-full truncate mb-[-4px]";
-                quoteBox.innerText = `⤺ ${payload.replyToText}`;
-                mainWrapper.appendChild(quoteBox);
-            }
-
-            let bubble = document.createElement('div');
-            bubble.className = `px-4 py-2 rounded-xl text-xs sm:text-sm relative break-words w-full ${sender === 'me' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-white'}`;
-            
-            let textSpan = document.createElement('span');
-            textSpan.id = `text-${msgId}`;
-            textSpan.innerText = msgText;
-            bubble.appendChild(textSpan);
-
-            let actionsDiv = document.createElement('div');
-            actionsDiv.id = `actions-${msgId}`;
-            actionsDiv.className = "text-[10px] text-slate-400 mt-1 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 cursor-pointer select-none justify-end";
-            
-            actionsDiv.innerHTML += `<span onclick="initiateReply('${msgId}', '${msgText.replace(/'/g, "\\'")}')" class="hover:text-cyan-400">↩ Reply</span>`;
-            
-            if (sender === 'me') {
-                actionsDiv.innerHTML += `<span onclick="initiateEdit('${msgId}', '${msgText.replace(/'/g, "\\'")}')" class="hover:text-yellow-400">✏️ Edit</span>`;
-                actionsDiv.innerHTML += `<span onclick="requestDelete('${msgId}')" class="hover:text-red-400">🗑️ Delete</span>`;
-            }
-
-            mainWrapper.appendChild(bubble);
-            mainWrapper.appendChild(actionsDiv);
-            
-            messagesContainer.appendChild(mainWrapper);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function handleKey(e) { if(e.key === "Enter") sendMsg(); }
-    </script>
+    <script src="client.js"></script>
 </body>
 </html>
